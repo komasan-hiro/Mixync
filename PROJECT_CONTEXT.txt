@@ -1,0 +1,50 @@
+# Project Context & Handover Summary
+
+## 1. Project Overview
+*   **App Name:** Mixync (formerly BioMixer)
+*   **Repo Branch:** `Graduation_Project_new`
+*   **Architecture:**
+    *   **Frontend:** React (Vite) + Capacitor (Android Native)
+    *   **Backend Node:** Express.js (Port 3001 -> Exposed via Nginx)
+    *   **Backend Python:** FastAPI (Port 8000 -> Internal use only)
+    *   **DB:** SQLite (on Server)
+
+## 2. Server Infrastructure (CRITICAL)
+*   **Provider:** Xserver VPS (NOT Conoha - Do not confuse this)
+*   **IP Address:** 210.131.211.133
+*   **Domain:** 210.131.211.133.nip.io
+*   **OS:** Ubuntu
+*   **Management:**
+    *   **Console:** Serial Console (preferred) or VNC
+    *   **Firewall (Internal):** `ufw` (Ports 22, 80, 443 ALLOWED)
+    *   **Firewall (External):** Xserver Packet Filter (Must allow SSH, Web, SSL, and **ICMP**)
+
+## 3. Environment & Connectivity
+*   **Work Location:** Variable (Home, School, others).
+*   **Network:** Wi-Fi environment changes.
+    *   *Note:* Some networks (like School Wi-Fi) may block Ping or weird ports. Tethering is the fallback.
+    *   *Correction:* The Xserver Packet Filter was the cause of Ping Timeout, not the School Wi-Fi in this instance.
+    *   **Dev Environment:** Antigravity Terminal Only (No VS Code).
+
+
+## 4. Current Status (As of Dec 18, 2025)
+*   **Connectivity:**
+    *   **App/Web (TCP 80):** ✅ Likely Working (Port 80 is open).
+    *   **Ping (ICMP):** ❓ Unverified / Blocked (User may have skipped adding ICMP rule).
+*   **Backend Node:** ✅ Online (PM2 id: 0).
+*   **Backend Python:** ✅ Online (PM2 id: python-api).
+    *   *Fix:* Installed `libsndfile1` and changed startup command to `uvicorn main:app ...`.
+*   **Fitbit Integration:** 🚧 In Progress.
+    *   Callback URL Issue: `https` is required by Fitbit.
+    *   Nginx is not yet fully configured for SSL (Port 443).
+    *   *Next Step:* Run `restore_ssl.sh` (or manual OpenSSL setup) to enable HTTPS on Nginx so Fitbit Redirect works.
+
+## 5. Deployment Workflow (The Golden Path)
+1.  **Local (PC):** `git add .` -> `git commit` -> `git push`
+2.  **Server (Console):**
+    ```bash
+    cd ~/new-sunrise-manage
+    git pull origin Graduation_Project_new
+    pm2 restart all
+    ```
+    *(Note: Git on server might be flaky depending on keys/permissions, direct commands are sometimes faster)*

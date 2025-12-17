@@ -16,27 +16,8 @@ const app = express();
 app.use(logger('dev'));
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      'http://localhost:5173',     // Vite dev server
-      'http://localhost',           // Capacitor
-      'capacitor://localhost',      // Capacitor iOS
-      'http://10.0.2.2:3001',       // Android emulator
-    ];
-
-    // Check if origin matches allowed origins or localhost with any port
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
-      callback(null, true);
-    }
-    // Allow any local network IP (192.168.x.x, 10.x.x.x, 172.16.x.x) for real device
-    else if (/^http:\/\/(192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin)) {
-      callback(null, true);
-    }
-    else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // TEMPORARY: Allow ALL origins to ensure connection
+    return callback(null, true);
   },
   credentials: true
 }));

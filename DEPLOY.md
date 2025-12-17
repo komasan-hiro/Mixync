@@ -157,4 +157,30 @@ sudo ufw enable
 ## 補足: フロントエンド (Androidアプリ) の設定 (ローカルPC上で実行)
 
 サーバーのデプロイが完了したら、ローカル環境の `backend-node/.env` の `PC_IP_ADDRESS` を **サーバーのIPアドレス** に変更して、Androidアプリをビルドし直してください。
+
 (FitbitのRedirect URLも `http://<サーバーIP>/auth/fitbit/callback` に更新する必要があります)
+
+## 6. SSL (HTTPS) 化 (SSHで接続したサーバー上で実行)
+
+Fitbit連携を行うためには、通信の暗号化(HTTPS)が必須です。
+サーバーには既に自動化スクリプト `restore_ssl.sh` が用意されています。
+
+### SSL化スクリプトの実行
+```bash
+cd ~/new-sunrise-manage
+sudo bash restore_ssl.sh
+```
+
+### 結果の確認
+実行後、ブラウザで `https://210.131.211.133.nip.io` にアクセスして、安全ではありません（自己署名証明書のため）等の警告が出つつも、完了メッセージ（JSON）が表示されれば成功です。
+
+### アプリ設定の更新 (重要)
+SSL化が完了したら、`.env` ファイルの `FITBIT_CALLBACK_URL` を `http` から **`https`** に変更してください。
+
+```bash
+cd ~/new-sunrise-manage/backend-node
+nano .env
+# FITBIT_CALLBACK_URL=https://210.131.211.133.nip.io/auth/fitbit/callback に変更
+pm2 restart biomixer-node
+```
+
