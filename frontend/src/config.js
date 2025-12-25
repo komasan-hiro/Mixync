@@ -17,7 +17,7 @@ const host = window.location.host; // includes port if present
 
 export const WS_BASE_URL = isNative
     ? `wss://${VPS_IP}` // Native uses direct VPS connection (prefer WSS if SSL enabled)
-    : `${protocol}//${host}`; // Web uses current origin (proxy handes it)
+    : `${protocol}//${host}/api`; // Web uses current origin (proxy handes it)
 
 console.log('[CONFIG] API_BASE_URL:', API_BASE_URL);
 console.log('[CONFIG] WS_BASE_URL:', WS_BASE_URL);
