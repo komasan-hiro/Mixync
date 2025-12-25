@@ -40,51 +40,58 @@ function WakeupCalculator() {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
-      <Typography variant="h5" component="h3" gutterBottom>
-        おすすめ起床時間
-      </Typography>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2">あなたの全睡眠データを分析し、あなたに最適化された起床時間を計算します。</Typography>
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <TextField
-          label="就寝時刻"
-          type="time"
-          value={bedtime}
-          onChange={(e) => setBedtime(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-        />
-        <Button
-          onClick={handleAnalyze}
-          variant="contained"
-          disabled={isLoading}
-          sx={{
-            color: 'white',
-            borderRadius: '20px',
-            background: 'linear-gradient(145deg, #50e3c2, #29b6f6)',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-            }
-          }}
-        >
-          {isLoading ? '分析中...' : '睡眠サイクルを分析する'}
-        </Button>
-      </Box>
+    <Box sx={{ width: '100%', mt: 0, flexGrow: 1, boxSizing: 'border-box' }}>
 
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '30px',
+        p: 3,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+      }}>
+        <Typography variant="h6" gutterBottom color="text.primary" sx={{ mb: 2 }}>
+          おすすめ起床時間
+        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2">あなたの全睡眠データを分析し、あなたに最適化された起床時間を計算します。</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <TextField
+            label="就寝時刻"
+            type="time"
+            value={bedtime}
+            onChange={(e) => setBedtime(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ flex: 1, minWidth: '120px' }}
+          />
+          <Button
+            onClick={handleAnalyze}
+            variant="contained"
+            disabled={isLoading}
+            sx={{
+              ml: 1,
+              whiteSpace: 'pre-line', // Allow line break
+              lineHeight: 1.2,
+              py: 1,
+              minWidth: 'auto',
+              borderRadius: '30px'
+            }}
+          >
+            {isLoading ? '分析中...' : '睡眠サイクルを\n分析する'}
+          </Button>
+        </Box>
 
-      {recommendations && (
-        <Alert severity="success" sx={{ mt: 2 }}>
-          {recommendations.message}
-          <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
-            {recommendations.times.map(time => <li key={time}>{time}</li>)}
-          </ul>
-        </Alert>
-      )}
-    </Paper>
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+
+        {recommendations && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            {recommendations.message}
+            <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+              {recommendations.times.map(time => <li key={time}>{time}</li>)}
+            </ul>
+          </Alert>
+        )}
+      </Box>
+    </Box>
   );
 }
 

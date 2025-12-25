@@ -69,7 +69,7 @@ function HRVTestPage() {
                 HRV・心拍数データテスト
             </Typography>
 
-            <Paper sx={{ p: 3, mb: 3 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
                 <TextField
                     label="日付"
                     type="date"
@@ -107,7 +107,7 @@ function HRVTestPage() {
             </Paper>
 
             {hrvData && (
-                <Paper sx={{ p: 3, mb: 3 }}>
+                <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
                     <Typography variant="h6" gutterBottom>
                         HRVデータ結果
                     </Typography>
@@ -124,7 +124,7 @@ function HRVTestPage() {
             )}
 
             {hrData && (
-                <Paper sx={{ p: 3 }}>
+                <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
                     <Typography variant="h6" gutterBottom>
                         心拍数データ結果
                     </Typography>

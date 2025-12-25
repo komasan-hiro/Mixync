@@ -1,6 +1,6 @@
 {
   "appId": "com.biomixer.app",
-  "appName": "BioMixer",
+  "appName": "Mixync",
   "webDir": "dist",
   "server": {
     "cleartext": true,

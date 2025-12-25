@@ -102,7 +102,7 @@ function SettingsPage() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+    <Paper elevation={0} sx={{ p: 4, mt: 4, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
       <Link component={RouterLink} to="/">
         &larr; ホームに戻る
       </Link>

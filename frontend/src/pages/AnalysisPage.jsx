@@ -137,7 +137,7 @@ function AnalysisPage() {
       {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
 
       {/* Manual Calculation Area */}
-      <Paper elevation={2} sx={{ p: 2, mb: 4 }}>
+      <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
         <Typography variant="h6">手動分析 & 計算実行</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
           <TextField
@@ -172,30 +172,32 @@ function AnalysisPage() {
       </Paper>
 
       {/* Events List Area */}
-      <Typography variant="h5" gutterBottom>アラームイベント履歴</Typography>
-      <List>
-        {events.map((event) => (
-          <Paper key={event.id} sx={{ mb: 1 }}>
-            <ListItem
-              secondaryAction={
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(event.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              }
-            >
-              <Checkbox
-                edge="start"
-                checked={checkedEvents.has(event.id)}
-                onChange={() => handleCheckboxToggle(event.id)}
-              />
-              <ListItemText
-                primary={`アラーム時刻: ${new Date(event.rang_at_jp).toLocaleString('ja-JP')}`}
-                secondary={event.awakening_hr_slope ? `Slope: ${event.awakening_hr_slope.toFixed(4)} / StdDev: ${event.awakening_hr_stddev.toFixed(4)}` : '未計算'}
-              />
-            </ListItem>
-          </Paper>
-        ))}
-      </List>
+      <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+        <Typography variant="h5" gutterBottom>アラームイベント履歴</Typography>
+        <List>
+          {events.map((event) => (
+            <Paper key={event.id} elevation={0} sx={{ mb: 1, borderRadius: '30px', bgcolor: 'rgba(255,255,255,0.5)' }}>
+              <ListItem
+                secondaryAction={
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(event.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                }
+              >
+                <Checkbox
+                  edge="start"
+                  checked={checkedEvents.has(event.id)}
+                  onChange={() => handleCheckboxToggle(event.id)}
+                />
+                <ListItemText
+                  primary={`アラーム時刻: ${new Date(event.rang_at_jp).toLocaleString('ja-JP')}`}
+                  secondary={event.awakening_hr_slope ? `Slope: ${event.awakening_hr_slope.toFixed(4)} / StdDev: ${event.awakening_hr_stddev.toFixed(4)}` : '未計算'}
+                />
+              </ListItem>
+            </Paper>
+          ))}
+        </List>
+      </Paper>
     </Box>
   );
 }

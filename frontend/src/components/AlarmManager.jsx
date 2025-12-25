@@ -100,60 +100,84 @@ function AlarmManager() {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
-      <Typography variant="h5" component="h3" gutterBottom>アラーム管理</Typography>
+    <Box sx={{ width: '100%' }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Box>
+
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '30px',
+        p: 3,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        width: '90vw',
+        maxWidth: 'min(400px, 100%)',
+        mx: 'auto',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
         {alarms.length === 0 ? (
-          <Typography>現在設定されているアラームはありません。</Typography>
+          <Typography sx={{ mb: 3, color: 'text.secondary', textAlign: 'center' }}>
+            現在設定されているアラームはありません。
+          </Typography>
         ) : (
-          <List>
-            {alarms.map((alarm) => (
+          <List sx={{ width: '100%', p: 0, mb: 2 }}>
+            {alarms.map((alarm, index) => (
               <ListItem
+                disableGutters
                 key={alarm.id}
-                secondaryAction={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Switch
-                      edge="end"
-                      onChange={() => handleToggleAlarm(alarm)}
-                      checked={alarm.is_active === 1}
-                    />
-                    <IconButton edge="end" aria-label="edit" onClick={() => handleOpenModal(alarm)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteAlarm(alarm.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                }
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  borderBottom: index !== alarms.length - 1 ? '1px solid #f0f0f0' : 'none',
+                  pb: 2,
+                  mb: 2,
+                  width: '100%'
+                }}
               >
-                <ListItemText
-                  primary={alarm.time}
-                  secondary={`${formatDaysOfWeek(alarm.days_of_week)} - ${alarm.sound_file}`}
-                />
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                      {alarm.time}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatDaysOfWeek(alarm.days_of_week)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      {alarm.sound_file}
+                    </Typography>
+                  </Box>
+                  <Switch
+                    onChange={() => handleToggleAlarm(alarm)}
+                    checked={alarm.is_active === 1}
+                    color="primary"
+                  />
+                </Box>
+
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <IconButton size="small" onClick={() => handleOpenModal(alarm)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" color="error" onClick={() => handleDeleteAlarm(alarm.id)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </ListItem>
             ))}
           </List>
         )}
+
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpenModal()}
+          sx={{ borderRadius: '30px', px: 4, py: 1 }}
+        >
+          アラーム設定
+        </Button>
       </Box>
-      <Button
-        variant="contained"
-        sx={{
-          mt: 2,
-          color: 'white',
-          borderRadius: '20px',
-          background: 'linear-gradient(145deg, #50e3c2, #29b6f6)',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-          }
-        }}
-        startIcon={<AddIcon />}
-        onClick={() => handleOpenModal()}
-      >
-        アラーム設定
-      </Button>
+
       <AlarmSettingModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -161,7 +185,7 @@ function AlarmManager() {
         existingAlarm={editingAlarm}
         audioFiles={audioFiles}
       />
-    </Paper>
+    </Box>
   );
 }
 

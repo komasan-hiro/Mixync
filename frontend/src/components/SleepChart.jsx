@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { Paper, Box, Typography, Button, Alert } from '@mui/material';
+import { Paper, Box, Typography, Button, Alert, Grid, IconButton } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -116,6 +118,7 @@ function SleepChart() {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
       title: { display: true, text: '週間睡眠時間' },
@@ -153,23 +156,57 @@ function SleepChart() {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" component="h3" gutterBottom>
-          週間睡眠グラフ
-        </Typography>
-        <Button onClick={handleSync} variant="outlined" size="small" disabled={isSyncing}>
+    <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2, minHeight: '400px', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1 }}>
+        <Button
+          onClick={handleSync}
+          variant="outlined"
+          size="small"
+          disabled={isSyncing}
+          sx={{
+            borderRadius: '20px',
+            padding: '4px 12px',
+            minWidth: 'auto',
+            fontSize: '0.8rem'
+          }}
+        >
           {isSyncing ? '同期中...' : 'Fitbitと同期'}
         </Button>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Button onClick={() => changeWeek(-1)}>前の週</Button>
-        <Typography>{getWeekRangeString()}</Typography>
-        <Button onClick={() => changeWeek(1)}>次の週</Button>
+        <IconButton
+          onClick={() => changeWeek(-1)}
+          sx={{
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRadius: '50%',
+            p: 1
+          }}
+        >
+          <ChevronLeftIcon />
+        </IconButton>
+
+        <Typography sx={{ flex: 1, textAlign: 'center', fontWeight: 500, mx: 2 }}>
+          {getWeekRangeString()}
+        </Typography>
+
+        <IconButton
+          onClick={() => changeWeek(1)}
+          sx={{
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            borderRadius: '50%',
+            p: 1
+          }}
+        >
+          <ChevronRightIcon />
+        </IconButton>
       </Box>
       {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       {isLoading && <Typography>読み込み中...</Typography>}
-      {chartData && <Bar data={chartData} options={chartOptions} />}
+      {chartData && (
+        <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative' }}>
+          <Bar data={chartData} options={chartOptions} />
+        </Box>
+      )}
     </Paper>
   );
 }

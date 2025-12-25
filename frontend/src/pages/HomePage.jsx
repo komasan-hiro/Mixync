@@ -1,52 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { Link as RouterLink } from 'react-router-dom'; // Import RouterLink
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL, WS_BASE_URL } from '../config';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
 // MUI Imports
-import { Paper, Box, Typography, Button } from '@mui/material';
+import { Paper, Box, Typography, Button, Grid } from '@mui/material';
 
 // Component Imports
 import WakeupCalculator from '../components/WakeupCalculator';
 import AlarmManager from '../components/AlarmManager';
 import SleepChart from '../components/SleepChart';
-import RingingAlarmModal from '../components/RingingAlarmModal';
 import DataVisualization from '../components/DataVisualization';
 import AlarmHistory from '../components/AlarmHistory';
 
 function HomePage() {
   const { user, isAuthenticated, loading, getToken } = useAuth();
-  const [ringingAlarm, setRingingAlarm] = useState(null);
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const ws = new WebSocket(WS_BASE_URL);
-      ws.onopen = () => console.log('WebSocket connection established');
-      ws.onclose = () => console.log('WebSocket connection closed');
-      ws.onerror = (error) => console.error('WebSocket Error:', error);
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('Received WebSocket message:', data);
-          if (data.type === 'RING_ALARM' && data.alarm.user_id === user.id) {
-            setRingingAlarm(data.alarm);
-          }
-        } catch (e) {
-          console.error('Error parsing WebSocket message:', e);
-        }
-      };
-      return () => ws.close();
-    }
-  }, [isAuthenticated, user]);
 
   if (loading) {
-    return <Typography>読み込み中...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Typography variant="h6" color="textSecondary">読み込み中...</Typography>
+      </Box>
+    );
   }
 
-  const handleStopAlarm = () => {
-    setRingingAlarm(null);
-  };
+
 
   const handleFitbitConnect = async () => {
     const token = getToken();
@@ -83,51 +64,139 @@ function HomePage() {
   const renderUserContent = () => {
     if (!user) return null;
     return (
-      <Box>
-        <Typography>こんにちは, {user.email} さん。</Typography>
-        <WakeupCalculator />
-        <AlarmManager />
-        <DataVisualization />
-        <AlarmHistory />
-        <SleepChart />
-        {user.fitbit_user_id ? (
-          <>
-            <Paper elevation={2} sx={{ p: 2, mt: 4, backgroundColor: '#fff0f0' }}>
-              <Typography variant="h6" color="error">デバッグ用オプション</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>Fitbitとの連携で問題が発生した場合、以下のボタンで連携情報をリセットできます。</Typography>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleFitbitClear}
-              >
-                Fitbit連携をリセット
-              </Button>
+      <Box sx={{ pb: 4 }}>
+        <Grid container spacing={3}>
+          {/* Main Controls */}
+          {/* Main Controls - Vertical Layout */}
+
+          <Grid item xs={12}>
+            <Paper elevation={0} sx={{ p: 3, height: '100%', borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#4d3674', fontWeight: 600, pl: 1 }}>
+                サイクル分析
+              </Typography>
+              <WakeupCalculator />
             </Paper>
-          </>
-        ) : (
-          <Paper elevation={2} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
-            <Typography variant="h6" gutterBottom>Fitbitアカウントを連携してください。</Typography>
-            <Button variant="contained" onClick={handleFitbitConnect}>
-              Fitbitと連携
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper elevation={0} sx={{ p: 3, height: '100%', borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#4d3674', fontWeight: 600, pl: 1 }}>
+                アラーム管理
+              </Typography>
+              <AlarmManager />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} lg={8}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
+                週間睡眠グラフ
+              </Typography>
+              <SleepChart />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} lg={4}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', height: '100%', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
+                データ可視化
+              </Typography>
+              <DataVisualization />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
+                履歴
+              </Typography>
+              <AlarmHistory />
+            </Paper>
+          </Grid>
+
+          {/* System Status */}
+          <Grid item xs={12}>
+            {user.fitbit_user_id ? (
+              <Paper elevation={0} sx={{ p: 2, mt: 2, backgroundColor: '#fff0f0', border: '1px solid #ffcdd2', borderRadius: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                  <Box>
+                    <Typography variant="subtitle2" color="error" sx={{ fontWeight: 600 }}>デバッグ用オプション</Typography>
+                    <Typography variant="body2" color="textSecondary">Fitbit連携に問題がある場合のみ使用してください</Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={handleFitbitClear}
+                  >
+                    連携リセット
+                  </Button>
+                </Box>
+              </Paper>
+            ) : (
+              <Paper elevation={2} sx={{ p: 4, mt: 2, textAlign: 'center', borderRadius: 3, background: 'linear-gradient(145deg, #ffffff, #f0f4f8)' }}>
+                <Typography variant="h6" gutterBottom color="primary">Fitbitと連携して機能を最大限に活用</Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                  睡眠データを分析して、最適な起床時間を提案します。
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={handleFitbitConnect}
+                  size="large"
+                  sx={{ px: 4 }}
+                >
+                  Fitbitと連携する
+                </Button>
+              </Paper>
+            )}
+          </Grid>
+
+          {/* Debug Link for Logged In Users */}
+          <Grid item xs={12} sx={{ textAlign: 'center', mt: 4 }}>
+            <Button component={RouterLink} to="/colors" size="small" sx={{ color: 'rgba(255,255,255,0.3)' }}>
+              開発者用：色味テスト画面へ
             </Button>
-          </Paper>
-        )}
+          </Grid>
+        </Grid>
       </Box>
     );
   };
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
-        ようこそ！
-      </Typography>
       {isAuthenticated ? renderUserContent() : (
-        <Typography>ログインまたは新規登録をしてください。</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <Paper elevation={0} sx={{ p: 5, borderRadius: '70px', bgcolor: '#eeeeee', maxWidth: '600px', width: '100%', textAlign: 'center', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+            <Typography variant="h4" gutterBottom sx={{ color: '#4d3674', fontWeight: 600 }}>ようこそ！</Typography>
+            <Typography sx={{ color: '#535c68', mb: 4 }}>ログインまたは新規登録をしてください。</Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 4 }}>
+              <Button
+                variant="contained"
+                size="large"
+                component={RouterLink}
+                to="/login"
+                sx={{ px: 4, py: 1.5, fontSize: '1.1rem', borderRadius: 2 }}
+              >
+                ログイン
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                component={RouterLink}
+                to="/register"
+                sx={{ px: 4, py: 1.5, fontSize: '1.1rem', borderRadius: 2, color: '#4d3674', borderColor: '#4d3674' }}
+              >
+                新規登録
+              </Button>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <Button component={RouterLink} to="/colors" size="small" sx={{ color: 'rgba(0,0,0,0.3)' }}>
+                開発者用：色味テスト画面へ
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
       )}
-      <RingingAlarmModal
-        alarm={ringingAlarm}
-        onClose={handleStopAlarm}
-      />
     </Box>
   );
 }

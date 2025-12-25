@@ -117,11 +117,8 @@ function AlarmHistory() {
     });
 
     return (
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5">
-                    アラーム履歴
-                </Typography>
+        <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2 }}>
+            <Box sx={{ mb: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                         <InputLabel>並び替え</InputLabel>

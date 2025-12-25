@@ -171,12 +171,9 @@ function DataVisualization() {
     };
 
     return (
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5">
-                    データ可視化
-                </Typography>
-                <FormControl sx={{ minWidth: 200 }}>
+        <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2 }}>
+            <Box sx={{ mb: 3 }}>
+                <FormControl fullWidth>
                     <InputLabel>表示モード</InputLabel>
                     <Select
                         value={viewMode}

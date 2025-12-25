@@ -49,63 +49,98 @@ function LoginPage() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', // Removed to use global theme
+        py: 4,
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          p: 5,
+          width: '100%',
+          maxWidth: 450,
+          borderRadius: '70px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          bgcolor: '#eeeeee', // Standard Box Color
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)', // 3D Shadow
+          // background: 'rgba(255, 255, 255, 0.95)', // Removed old style
+          // backdropFilter: 'blur(10px)', // Removed old style
+        }}
       >
-        <Typography variant="h4" component="h1" gutterBottom>
-          ログイン
+        <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#2c3e50', mb: 1 }}>
+          おかえりなさい
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 4 }}>
+          Mixyncにログインして、快適な朝を迎えましょう
         </Typography>
 
-        {message && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{message}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          {message && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{message}</Alert>}
 
-        <TextField
-          label="メールアドレス"
-          type="email"
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="パスワード"
-          type="password"
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          sx={{
-            mt: 3,
-            mb: 2,
-            width: '50%',
-            color: 'white',
-            borderRadius: '20px',
-            background: 'linear-gradient(145deg, #50e3c2, #4a90e2)',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-            }
-          }}
-        >
-          ログイン
-        </Button>
-        <Typography variant="body2">
-          アカウントをお持ちでないですか？ <Link component={RouterLink} to="/register">こちらで新規登録</Link>
-        </Typography>
-      </Box>
-    </Paper>
+          <TextField
+            label="メールアドレス"
+            type="email"
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="パスワード"
+            type="password"
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            sx={{ mb: 3 }}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{
+              py: 1.5,
+              fontSize: '1.1rem',
+              mb: 3,
+            }}
+          >
+            ログイン
+          </Button>
+
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2" color="textSecondary">
+              アカウントをお持ちでないですか？
+            </Typography>
+            <Link
+              component={RouterLink}
+              to="/register"
+              sx={{
+                fontWeight: 600,
+                textDecoration: 'none',
+                '&:hover': { textDecoration: 'underline' }
+              }}
+            >
+              新規登録はこちら
+            </Link>
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
 

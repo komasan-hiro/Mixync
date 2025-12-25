@@ -55,7 +55,8 @@ function AlarmSettingModal({ isOpen, onClose, onSave, existingAlarm, audioFiles 
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 500,
+        width: '90%', // Responsive width
+        maxWidth: 500, // Max width for larger screens
         bgcolor: 'background.paper',
         boxShadow: 24,
         p: 4,
@@ -114,14 +115,7 @@ function AlarmSettingModal({ isOpen, onClose, onSave, existingAlarm, audioFiles 
             variant="contained"
             fullWidth
             sx={{
-              color: 'white',
-              borderRadius: '20px',
-              background: 'linear-gradient(145deg, #50e3c2, #29b6f6)',
-              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-              }
+              mt: 2
             }}
           >
             設定

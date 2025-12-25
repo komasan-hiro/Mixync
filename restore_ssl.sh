@@ -15,9 +15,9 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -out /etc/nginx/ssl/nginx.crt \
   -subj "/C=JP/ST=Tokyo/L=City/O=BioMixer/CN=210.131.211.133.nip.io"
 
-# 3. Restore Nginx Config
+# 3. Restore Nginx Config (Targeting 'biomixer' conf as per DEPLOY.md)
 echo "Restoring Nginx Configuration..."
-sudo bash -c 'cat > /etc/nginx/sites-available/default <<EOF
+sudo bash -c 'cat > /etc/nginx/sites-available/biomixer <<EOF
 server {
     listen 80;
     server_name 210.131.211.133.nip.io 210.131.211.133;
@@ -43,6 +43,11 @@ server {
     }
 }
 EOF'
+
+# Ensure proper symlink
+sudo ln -sf /etc/nginx/sites-available/biomixer /etc/nginx/sites-enabled/
+# Remove default to prevent conflicts
+sudo rm -f /etc/nginx/sites-enabled/default
 
 # 4. Restart Nginx
 echo "Restarting Nginx..."
