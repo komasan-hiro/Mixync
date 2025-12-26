@@ -92,12 +92,28 @@ function App() {
   const location = useLocation();
   const [ringingAlarm, setRingingAlarm] = React.useState(null);
 
+  // WebSocket Logic with Auto-Reconnection
+  const wsRef = React.useRef(null);
+  const reconnectTimeoutRef = React.useRef(null);
+
   React.useEffect(() => {
-    if (isAuthenticated && user) {
+    // Only connect if authenticated
+    if (!isAuthenticated || !user) return;
+
+    const connectWebSocket = () => {
+      // Clear any existing connection to be safe
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+
+      console.log('Attempting WebSocket connection...');
       const ws = new WebSocket(WS_BASE_URL);
-      ws.onopen = () => console.log('WebSocket connection established');
-      ws.onclose = () => console.log('WebSocket connection closed');
-      ws.onerror = (error) => console.error('WebSocket Error:', error);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -109,8 +125,34 @@ function App() {
           console.error('Error parsing WebSocket message:', e);
         }
       };
-      return () => ws.close();
-    }
+
+      ws.onclose = () => {
+        console.log('WebSocket connection closed. Reconnecting in 3s...');
+        // Schedule reconnection
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectWebSocket();
+        }, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+        ws.close(); // Ensure close triggers onclose for reconnection
+      };
+    };
+
+    // Initial connection
+    connectWebSocket();
+
+    // Cleanup on unmount or auth change
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.onclose = null; // Prevent reconnection on unmount
+        wsRef.current.close();
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
   }, [isAuthenticated, user]);
 
   const handleStopAlarm = () => {
