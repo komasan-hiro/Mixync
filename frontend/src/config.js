@@ -8,7 +8,7 @@ const VPS_IP = '210.131.211.133.nip.io';
 // Web: Use relative/localhost (Vite Proxy forwards to VPS)
 // Native: Use direct VPS URL (CapacitorHttp bypasses CORS)
 export const API_BASE_URL = isNative
-    ? `http://${VPS_IP}/api`
+    ? `http://${VPS_IP}`
     : ''; // Empty string means "same origin" (localhost), triggering Proxy
 
 // Determing WebSocket Protocol (ws or wss)
