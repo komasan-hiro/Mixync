@@ -10,10 +10,8 @@ import { Paper, Box, Typography, Button, Grid } from '@mui/material';
 
 // Component Imports
 import WakeupCalculator from '../components/WakeupCalculator';
-import AlarmManager from '../components/AlarmManager';
 import SleepChart from '../components/SleepChart';
 import DataVisualization from '../components/DataVisualization';
-import AlarmHistory from '../components/AlarmHistory';
 
 function HomePage() {
   const { user, isAuthenticated, loading, getToken } = useAuth();
@@ -78,15 +76,6 @@ function HomePage() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12}>
-            <Paper elevation={0} sx={{ p: 3, height: '100%', borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#4d3674', fontWeight: 600, pl: 1 }}>
-                アラーム管理
-              </Typography>
-              <AlarmManager />
-            </Paper>
-          </Grid>
-
           <Grid item xs={12} lg={8}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
@@ -102,15 +91,6 @@ function HomePage() {
                 データ可視化
               </Typography>
               <DataVisualization />
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
-                履歴
-              </Typography>
-              <AlarmHistory />
             </Paper>
           </Grid>
 
