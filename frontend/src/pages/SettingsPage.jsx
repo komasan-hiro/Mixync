@@ -105,9 +105,7 @@ function SettingsPage() {
 
   return (
     <Box sx={{ pb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ mt: 2, mb: 3, fontWeight: 'bold', color: '#4d3674' }}>
-        アラーム設定
-      </Typography>
+
 
       <Grid container spacing={3}>
         {/* 1. Alarm Management */}

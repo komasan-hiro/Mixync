@@ -114,26 +114,25 @@ function DataVisualization() {
         }
     };
 
-    // Prepare data for slope graph
+    // Prepare data for slope graph (Oldest -> Newest)
     const slopeChartData = {
         labels: events
             .filter(e => e.awakening_hr_slope !== null)
-            .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }))
-            .reverse(),
+            .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })),
         datasets: [{
             label: '覚醒速度 (bpm/sec)',
             data: events
                 .filter(e => e.awakening_hr_slope !== null)
-                .map(e => parseFloat(e.awakening_hr_slope?.toFixed(3) || 0))
-                .reverse(),
+                .map(e => parseFloat(e.awakening_hr_slope?.toFixed(3) || 0)),
             borderColor: '#29b6f6',
             backgroundColor: 'rgba(41, 182, 246, 0.1)',
             tension: 0.4
         }]
     };
 
-    // Prepare data for mixing comparison
-    const mixingStats = ['A', 'B', 'C'].map(mixing => {
+    // Prepare data for mixing comparison (All patterns A-E)
+    // Note: User requested ensuring B is shown. We will show A-E to be safe.
+    const mixingStats = ['A', 'B', 'C', 'D', 'E'].map(mixing => {
         const mixingEvents = events.filter(e => e.mixing_pattern === mixing && e.comfort_score !== null);
         const avgComfort = mixingEvents.length > 0
             ? mixingEvents.reduce((sum, e) => sum + e.comfort_score, 0) / mixingEvents.length
@@ -148,7 +147,7 @@ function DataVisualization() {
             slope: parseFloat(avgSlope.toFixed(3)),
             count: mixingEvents.length
         };
-    });
+    }).filter(m => m.count > 0 || USE_DEMO_DATA); // Show all if demo data, otherwise only active
 
     const mixingChartData = {
         labels: mixingStats.map(m => `ミキシング ${m.mixing}`),
@@ -168,18 +167,16 @@ function DataVisualization() {
         ]
     };
 
-    // Prepare data for comfort score trend
+    // Prepare data for comfort score trend (Oldest -> Newest)
     const comfortChartData = {
         labels: events
             .filter(e => e.comfort_score !== null)
-            .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }))
-            .reverse(),
+            .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })),
         datasets: [{
             label: '快適度スコア',
             data: events
                 .filter(e => e.comfort_score !== null)
-                .map(e => parseFloat(e.comfort_score?.toFixed(1) || 0))
-                .reverse(),
+                .map(e => parseFloat(e.comfort_score?.toFixed(1) || 0)),
             borderColor: '#50e3c2',
             backgroundColor: 'rgba(80, 227, 194, 0.1)',
             tension: 0.4

@@ -68,20 +68,20 @@ function HomePage() {
           {/* Main Controls - Vertical Layout */}
 
           <Grid item xs={12}>
-            <Paper elevation={0} sx={{ p: 3, height: '100%', borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#4d3674', fontWeight: 600, pl: 1 }}>
-                サイクル分析
-              </Typography>
-              <WakeupCalculator />
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} lg={8}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#241b66', fontWeight: 600, pl: 1 }}>
                 週間睡眠グラフ
               </Typography>
               <SleepChart />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} lg={8}>
+            <Paper elevation={0} sx={{ p: 3, height: '100%', borderRadius: '70px', bgcolor: '#eeeeee', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2, borderBottom: 1, borderColor: 'rgba(0,0,0,0.1)', pb: 1, color: '#4d3674', fontWeight: 600, pl: 1 }}>
+                サイクル分析
+              </Typography>
+              <WakeupCalculator />
             </Paper>
           </Grid>
 
