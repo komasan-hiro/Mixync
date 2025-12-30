@@ -30,8 +30,72 @@ function DataVisualization() {
     const [events, setEvents] = useState([]);
     const [viewMode, setViewMode] = useState('slope'); // 'slope', 'mixing', 'comfort'
 
+    // EXPERIMENTAL DATA FLAG
+    const USE_DEMO_DATA = true;
+
     useEffect(() => {
-        fetchEvents();
+        if (USE_DEMO_DATA) {
+            // Hardcoded data from 10/30 to 11/4
+            // Calculation logic:
+            // NormSlope = Slope / 0.2 (clamped 0-1)
+            // NormStd = Std / 15 (clamped 0-1)
+            // Objective = ((1-NormSlope) + (1-NormStd)) / 2
+            // Comfort = (Objective * 0.7 + ((Mood-1)/4) * 0.3) * 100
+
+            const demoEvents = [
+                {
+                    alarm_time: '2025-10-30T07:00:00',
+                    mixing_pattern: 'C', // Shimmer Reverb
+                    awakening_hr_slope: 0.08720,
+                    awakening_hr_stddev: 9.75773,
+                    mood_rating: 5,
+                    comfort_score: 62.0 // Calc: (0.457*0.7 + 1.0*0.3)*100
+                },
+                {
+                    alarm_time: '2025-10-31T07:00:00',
+                    mixing_pattern: 'B', // PAN
+                    awakening_hr_slope: 0.06301,
+                    awakening_hr_stddev: 6.04014,
+                    mood_rating: 4,
+                    comfort_score: 67.4 // Calc: (0.641*0.7 + 0.75*0.3)*100
+                },
+                {
+                    alarm_time: '2025-11-01T07:00:00',
+                    mixing_pattern: 'A', // Tremolo
+                    awakening_hr_slope: 0.04382,
+                    awakening_hr_stddev: 3.26582,
+                    mood_rating: 3,
+                    comfort_score: 69.7 // Calc: (0.781*0.7 + 0.5*0.3)*100
+                },
+                {
+                    alarm_time: '2025-11-02T07:00:00',
+                    mixing_pattern: 'C', // Shimmer Reverb
+                    awakening_hr_slope: 0.09758,
+                    awakening_hr_stddev: 5.52011,
+                    mood_rating: 5,
+                    comfort_score: 70.0 // Calc: (0.572*0.7 + 1.0*0.3)*100
+                },
+                {
+                    alarm_time: '2025-11-03T07:00:00',
+                    mixing_pattern: 'A', // Tremolo
+                    awakening_hr_slope: 0.04686,
+                    awakening_hr_stddev: 3.56463,
+                    mood_rating: 3,
+                    comfort_score: 68.5 // Calc: (0.764*0.7 + 0.5*0.3)*100
+                },
+                {
+                    alarm_time: '2025-11-04T07:00:00',
+                    mixing_pattern: 'B', // PAN
+                    awakening_hr_slope: 0.16224,
+                    awakening_hr_stddev: 8.73651,
+                    mood_rating: 3,
+                    comfort_score: 36.2 // Calc: (0.303*0.7 + 0.5*0.3)*100
+                }
+            ];
+            setEvents(demoEvents);
+        } else {
+            fetchEvents();
+        }
     }, []);
 
     const fetchEvents = async () => {
