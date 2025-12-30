@@ -91,6 +91,13 @@ const initDb = () => {
     // Column probably already exists; ignore error
   }
 
+  // Ensure is_deleted column exists for alarms table (Soft Delete)
+  try {
+    db.exec('ALTER TABLE alarms ADD COLUMN is_deleted INTEGER DEFAULT 0');
+  } catch (e) {
+    // Column probably already exists; ignore error
+  }
+
   console.log("Database tables created successfully.");
 };
 

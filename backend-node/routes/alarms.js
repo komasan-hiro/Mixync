@@ -10,7 +10,8 @@ router.use(authenticateToken);
 router.get('/', (req, res) => {
   try {
     const userId = req.user.id;
-    const stmt = db.prepare('SELECT * FROM alarms WHERE user_id = ?');
+    // Soft Delete: Only fetch alarms that are not deleted
+    const stmt = db.prepare('SELECT * FROM alarms WHERE user_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)');
     const rows = stmt.all(userId);
     res.status(200).json(rows);
   } catch (error) {
@@ -35,7 +36,7 @@ router.post('/', (req, res) => {
 
     console.log('[ALARM] Creating alarm:', { datetime, time, dayOfWeek, sound_file, mixing_pattern: pattern });
 
-    const stmt = db.prepare('INSERT INTO alarms (user_id, time, days_of_week, sound_file, mixing_pattern, is_active) VALUES (?, ?, ?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO alarms (user_id, time, days_of_week, sound_file, mixing_pattern, is_active, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 0)');
     const info = stmt.run(userId, time, dayOfWeek, sound_file, pattern, is_active === undefined ? 1 : is_active);
 
     res.status(201).json({ message: 'Alarm created successfully.', alarmId: info.lastInsertRowid });
@@ -81,7 +82,8 @@ router.put('/:id', (req, res) => {
     }
 
     params.push(alarmId, userId);
-    const sql = `UPDATE alarms SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`;
+    // Ensure we only update active alarms
+    const sql = `UPDATE alarms SET ${updates.join(', ')} WHERE id = ? AND user_id = ? AND (is_deleted = 0 OR is_deleted IS NULL)`;
     const stmt = db.prepare(sql);
     const info = stmt.run(...params);
 
@@ -101,7 +103,9 @@ router.delete('/:id', (req, res) => {
     const userId = req.user.id;
     const alarmId = req.params.id;
 
-    const stmt = db.prepare('DELETE FROM alarms WHERE id = ? AND user_id = ?');
+    // Soft Delete: Check if user owns the alarm and then mark as deleted
+    // Instead of DELETE, we UPDATE is_deleted to 1
+    const stmt = db.prepare('UPDATE alarms SET is_deleted = 1 WHERE id = ? AND user_id = ?');
     const info = stmt.run(alarmId, userId);
 
     if (info.changes === 0) {
