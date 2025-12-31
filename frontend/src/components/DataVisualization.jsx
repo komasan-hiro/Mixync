@@ -150,7 +150,7 @@ function DataVisualization() {
     }).filter(m => m.count > 0 || USE_DEMO_DATA); // Show all if demo data, otherwise only active
 
     const mixingChartData = {
-        labels: mixingStats.map(m => `ミキシング ${m.mixing}`),
+        labels: mixingStats.map(m => m.mixing),
         datasets: [
             {
                 label: '平均快適度',
@@ -270,9 +270,6 @@ function DataVisualization() {
 
                     {viewMode === 'mixing' && (
                         <Box>
-                            <Typography variant="h6" gutterBottom>
-                                ミキシングパターン別の比較
-                            </Typography>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
                                 各ミキシングの平均快適度とSlope
                             </Typography>
@@ -282,7 +279,7 @@ function DataVisualization() {
                             <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'center' }}>
                                 {mixingStats.map(m => (
                                     <Typography key={m.mixing} variant="caption" color="text.secondary">
-                                        ミキシング {m.mixing}: {m.count}回
+                                        {m.mixing}: {m.count}回
                                     </Typography>
                                 ))}
                             </Box>
