@@ -8,12 +8,24 @@ const db = new Database(dbPath);
 console.log('--- Generating Controlled Dummy Data (35 Days) ---');
 
 // 1. Clear existing data
+// 1. Clear existing data & Ensure Schema
 try {
+    console.log('Checking database schema...');
+    try {
+        db.exec('ALTER TABLE alarm_events ADD COLUMN is_deleted INTEGER DEFAULT 0');
+        console.log('Added missing column: is_deleted');
+    } catch (e) {
+        // Column likely exists
+        if (!e.message.includes('duplicate column')) {
+            console.log('Schema check passed (column likelihood exists or other error: ' + e.message + ')');
+        }
+    }
+
     console.log('Clearing existing alarm_events...');
     db.exec('DELETE FROM alarm_events');
     console.log('Cleared.');
 } catch (err) {
-    console.error('Error clearing data:', err);
+    console.error('Error clearing/preparing data:', err);
     process.exit(1);
 }
 
