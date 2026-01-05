@@ -57,6 +57,23 @@ const shuffledPatterns = shuffle(patterns);
 const getUser = db.prepare('SELECT id FROM users LIMIT 1').get();
 const userId = getUser ? getUser.id : 1;
 
+// Ensure a valid alarm exists for FK constraint
+let getAlarm = db.prepare('SELECT id FROM alarms WHERE user_id = ? LIMIT 1').get(userId);
+let alarmId = getAlarm ? getAlarm.id : null;
+
+if (!alarmId) {
+    console.log('No alarm found for user. Creating dummy alarm...');
+    const createAlarm = db.prepare(`
+        INSERT INTO alarms (user_id, time, days_of_week, sound_file, mixing_pattern, is_active)
+        VALUES (?, '07:00', '1111111', 'Birds', 'AUTO', 1)
+    `);
+    const info = createAlarm.run(userId);
+    alarmId = info.lastInsertRowid;
+    console.log(`Created dummy alarm with ID: ${alarmId}`);
+} else {
+    console.log(`Using existing alarm ID: ${alarmId}`);
+}
+
 const insertStmt = db.prepare(`
   INSERT INTO alarm_events (
     user_id, alarm_id, alarm_time, mixing_pattern, 
@@ -93,7 +110,7 @@ for (let i = 0; i < DAYS_COUNT; i++) {
 
     const event = {
         user_id: userId,
-        alarm_id: 1, // Dummy alarm ID
+        alarm_id: alarmId, // Use resolved alarm ID
         alarm_time: date.toISOString(),
         mixing_pattern: mixing,
         rang_at_jp: date.toLocaleString('ja-JP'),
