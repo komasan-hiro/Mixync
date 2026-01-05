@@ -243,10 +243,19 @@ function DataVisualization() {
     };
 
     // Calculate dynamic width for scrollable charts
-    // Base 600px, add 50px per data point over 10 points
+    // 1. Calculate duration in days
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const durationDays = (end - start) / (1000 * 60 * 60 * 24) + 1; // Include start day
+
+    // 2. Base width logic
+    // If duration <= 7 days, width is 100% (no scroll).
+    // If duration > 7 days, dynamic width based on data points.
     const dataPointCount = filteredEvents.length;
-    const dynamicChartWidth = Math.max(100, Math.max(600, dataPointCount * 50));
-    const isScrollable = viewMode !== 'mixing'; // Mixing is fixed categories (5), usually doesn't need much scroll unless huge labels
+    const isScrollable = durationDays > 7;
+    const dynamicChartWidth = isScrollable
+        ? Math.max(100, Math.max(600, dataPointCount * 50))
+        : '100%';
 
     return (
         <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2 }}>
@@ -292,30 +301,44 @@ function DataVisualization() {
 
             {/* Date Range Navigation (Hidden if Mixing Mode) */}
             {viewMode !== 'mixing' && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-                    <IconButton onClick={() => changeWeek(-1)} size="small">
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, gap: 1, flexWrap: 'nowrap' }}>
+                    <IconButton onClick={() => changeWeek(-1)} size="small" sx={{ p: 0.5 }}>
                         <ChevronLeftIcon />
                     </IconButton>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <TextField
                             type="date"
                             size="small"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            sx={{ width: 150 }}
+                            sx={{
+                                width: '110px',
+                                '& .MuiInputBase-input': {
+                                    padding: '4px 2px',
+                                    fontSize: '0.85rem',
+                                    textAlign: 'center'
+                                }
+                            }}
                         />
-                        <Typography>～</Typography>
+                        <Typography variant="body2" sx={{ mx: 0.5 }}>～</Typography>
                         <TextField
                             type="date"
                             size="small"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            sx={{ width: 150 }}
+                            sx={{
+                                width: '110px',
+                                '& .MuiInputBase-input': {
+                                    padding: '4px 2px',
+                                    fontSize: '0.85rem',
+                                    textAlign: 'center'
+                                }
+                            }}
                         />
                     </Box>
 
-                    <IconButton onClick={() => changeWeek(1)} size="small">
+                    <IconButton onClick={() => changeWeek(1)} size="small" sx={{ p: 0.5 }}>
                         <ChevronRightIcon />
                     </IconButton>
                 </Box>
@@ -334,8 +357,8 @@ function DataVisualization() {
                                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
                                         低い値ほど穏やかな目覚めを示します
                                     </Typography>
-                                    <Box sx={{ overflowX: 'auto', pb: 2 }}>
-                                        <Box sx={{ height: 300, minWidth: `${dynamicChartWidth}px` }}>
+                                    <Box sx={{ overflowX: isScrollable ? 'auto' : 'visible', pb: 2 }}>
+                                        <Box sx={{ height: 300, minWidth: typeof dynamicChartWidth === 'number' ? `${dynamicChartWidth}px` : dynamicChartWidth }}>
                                             <Line data={slopeChartData} options={lineOptions} />
                                         </Box>
                                     </Box>
@@ -357,8 +380,8 @@ function DataVisualization() {
                             )}
                             {viewMode === 'comfort' && (
                                 <Box>
-                                    <Box sx={{ overflowX: 'auto', pb: 2 }}>
-                                        <Box sx={{ height: 300, minWidth: `${dynamicChartWidth}px` }}>
+                                    <Box sx={{ overflowX: isScrollable ? 'auto' : 'visible', pb: 2 }}>
+                                        <Box sx={{ height: 300, minWidth: typeof dynamicChartWidth === 'number' ? `${dynamicChartWidth}px` : dynamicChartWidth }}>
                                             <Line data={comfortChartData} options={lineOptions} />
                                         </Box>
                                     </Box>
