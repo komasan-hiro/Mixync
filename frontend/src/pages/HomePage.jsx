@@ -131,12 +131,7 @@ function HomePage() {
             )}
           </Grid>
 
-          {/* Debug Link for Logged In Users */}
-          <Grid item xs={12} sx={{ textAlign: 'center', mt: 4 }}>
-            <Button component={RouterLink} to="/colors" size="small" sx={{ color: 'rgba(255,255,255,0.3)' }}>
-              開発者用：色味テスト画面へ
-            </Button>
-          </Grid>
+
         </Grid>
       </Box>
     );
@@ -169,11 +164,7 @@ function HomePage() {
                 新規登録
               </Button>
             </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Button component={RouterLink} to="/colors" size="small" sx={{ color: 'rgba(0,0,0,0.3)' }}>
-                開発者用：色味テスト画面へ
-              </Button>
-            </Box>
+
           </Paper>
         </Box>
       )}
