@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import {
     Paper, Box, Typography, Select, MenuItem, FormControl, InputLabel,
-    IconButton, ToggleButton, ToggleButtonGroup,
+    IconButton, ToggleButton, ToggleButtonGroup, Button,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -140,6 +139,10 @@ function DataVisualization() {
         setCurrentDate(newDate);
     };
 
+    const goToToday = () => {
+        setCurrentDate(new Date());
+    };
+
     const getWeekRange = () => {
         const sunday = getSunday(currentDate);
         const saturday = new Date(sunday);
@@ -276,27 +279,29 @@ function DataVisualization() {
         <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2 }}>
 
             {/* Header: Title and Toggles */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                <Box>
-                    <Typography variant="h6" gutterBottom>データ可視化</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        {dateRangeString}
-                    </Typography>
-                </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                <Typography variant="h6">データ可視化</Typography>
 
-                <ToggleButtonGroup
-                    value={displayFormat}
-                    exclusive
-                    onChange={handleFormatChange}
-                    size="small"
-                >
-                    <ToggleButton value="graph">
-                        <BarChartIcon sx={{ mr: 1 }} /> グラフ
-                    </ToggleButton>
-                    <ToggleButton value="table">
-                        <TableChartIcon sx={{ mr: 1 }} /> データ
-                    </ToggleButton>
-                </ToggleButtonGroup>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button onClick={goToToday} size="small" variant="outlined" sx={{ minWidth: 'auto' }}>
+                        今日
+                    </Button>
+
+                    <ToggleButtonGroup
+                        value={displayFormat}
+                        exclusive
+                        onChange={handleFormatChange}
+                        size="small"
+                        sx={{ whiteSpace: 'nowrap' }}
+                    >
+                        <ToggleButton value="graph" sx={{ px: 2 }}>
+                            <BarChartIcon sx={{ mr: 0.5, fontSize: '1.2rem' }} /> グラフ
+                        </ToggleButton>
+                        <ToggleButton value="table" sx={{ px: 2 }}>
+                            <TableChartIcon sx={{ mr: 0.5, fontSize: '1.2rem' }} /> データ
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
             </Box>
 
             {/* Navigation: Prev/Next Week */}
@@ -376,16 +381,16 @@ function DataVisualization() {
                         </>
                     ) : (
                         /* DATA TABLE VIEW */
-                        <TableContainer>
+                        <TableContainer sx={{ overflowX: 'auto', maxWidth: '100%' }}>
                             {viewMode === 'mixing' ? (
                                 /* Aggregate Table for Mixing */
-                                <Table size="small">
+                                <Table size="small" sx={{ minWidth: 300 }}>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>パターン</TableCell>
-                                            <TableCell align="right">回数</TableCell>
-                                            <TableCell align="right">平均快適度</TableCell>
-                                            <TableCell align="right">平均Slope</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}>パターン</TableCell>
+                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>回数</TableCell>
+                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>平均快適度</TableCell>
+                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>平均Slope</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -401,23 +406,26 @@ function DataVisualization() {
                                 </Table>
                             ) : (
                                 /* Daily Events Table for Slope/Comfort */
-                                <Table size="small">
+                                <Table size="small" sx={{ minWidth: 350 }}>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>日付</TableCell>
-                                            <TableCell>パターン</TableCell>
-                                            {viewMode === 'slope' && <TableCell align="right">覚醒速度 (Slope)</TableCell>}
-                                            {viewMode === 'comfort' && <TableCell align="right">快適度</TableCell>}
-                                            {/* Show both if general view? Let's stick to mode specific to avoid clutter unless desired */}
-                                            {/* Actually user wants "Data Display". Showing everything is usually better for "Data" view. */}
-                                            {/* Let's show common relevant fields for context if space allows. */}
-                                            <TableCell align="right">StdDev</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}>日付</TableCell>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}>パターン</TableCell>
+                                            {viewMode === 'slope' && (
+                                                <TableCell align="right" sx={{ minWidth: 100 }}>
+                                                    覚醒速度<br />(Slope)
+                                                </TableCell>
+                                            )}
+                                            {viewMode === 'comfort' && (
+                                                <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>快適度</TableCell>
+                                            )}
+                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>StdDev</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {weeklyEvents.map((row) => (
                                             <TableRow key={row.id || row.alarm_time}>
-                                                <TableCell>
+                                                <TableCell sx={{ whiteSpace: 'nowrap' }}>
                                                     {new Date(row.alarm_time).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' })}
                                                 </TableCell>
                                                 <TableCell>{row.mixing_pattern}</TableCell>
