@@ -5,6 +5,7 @@ import CalculateIcon from '@mui/icons-material/Calculate';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function AlarmHistory() {
     const [events, setEvents] = useState([]);
@@ -33,6 +34,27 @@ function AlarmHistory() {
     };
 
     useEffect(() => { fetchEvents(); }, []);
+
+    const handleDeleteEvent = async (eventId) => {
+        if (!window.confirm('この履歴を削除しますか？（データベースからは削除されません）')) {
+            return;
+        }
+        setError('');
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('履歴の削除に失敗しました。');
+            setSuccess('履歴を削除しました。');
+            fetchEvents();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
     const handleCalculatePostProcess = async (eventId, alarmTime) => {
         setSuccess('');
@@ -159,16 +181,21 @@ function AlarmHistory() {
                                     alignItems: 'flex-start'
                                 }}
                             >
-                                <Box sx={{ width: '100%', mb: 1 }}>
-                                    <Typography variant="subtitle1" fontWeight="bold">
-                                        イベント #{event.id}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        アラーム時刻: {event.alarm_time ? new Date(event.alarm_time).toLocaleString('ja-JP') : '未設定'}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        ミキシング: {event.mixing_pattern || '未設定'}
-                                    </Typography>
+                                <Box sx={{ width: '100%', mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <Box>
+                                        <Typography variant="subtitle1" fontWeight="bold">
+                                            イベント #{event.id}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            アラーム時刻: {event.alarm_time ? new Date(event.alarm_time).toLocaleString('ja-JP') : '未設定'}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            ミキシング: {event.mixing_pattern || '未設定'}
+                                        </Typography>
+                                    </Box>
+                                    <IconButton size="small" onClick={() => handleDeleteEvent(event.id)}>
+                                        <DeleteIcon fontSize="small" color="action" />
+                                    </IconButton>
                                 </Box>
 
                                 <Box sx={{ width: '100%', display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>

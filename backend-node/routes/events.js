@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
         comfort_score,
         created_at
       FROM alarm_events 
-      WHERE user_id = ? 
+      WHERE user_id = ? AND (is_deleted IS NULL OR is_deleted = 0)
       ORDER BY alarm_time DESC
     `);
     const rows = stmt.all(req.user.id);
@@ -45,11 +45,11 @@ router.get('/', (req, res) => {
   }
 });
 
-// DELETE /api/events/:id - Deletes a specific alarm event
+// DELETE /api/events/:id - Soft deletes a specific alarm event
 router.delete('/:id', (req, res) => {
   try {
     const { id: eventId } = req.params;
-    const stmt = db.prepare('DELETE FROM alarm_events WHERE id = ? AND user_id = ?');
+    const stmt = db.prepare('UPDATE alarm_events SET is_deleted = 1 WHERE id = ? AND user_id = ?');
     const info = stmt.run(eventId, req.user.id);
 
     if (info.changes === 0) {

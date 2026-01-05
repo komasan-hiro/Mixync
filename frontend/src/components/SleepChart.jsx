@@ -160,14 +160,19 @@ function SleepChart() {
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1 }}>
         <Button
           onClick={handleSync}
-          variant="outlined"
+          variant="contained"
           size="small"
           disabled={isSyncing}
           sx={{
             borderRadius: '20px',
             padding: '4px 12px',
             minWidth: 'auto',
-            fontSize: '0.8rem'
+            fontSize: '0.8rem',
+            bgcolor: 'primary.main',
+            color: 'white',
+            '&:hover': {
+              bgcolor: 'primary.dark',
+            }
           }}
         >
           {isSyncing ? '同期中...' : 'Fitbitと同期'}

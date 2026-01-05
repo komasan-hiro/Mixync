@@ -46,7 +46,10 @@ function SettingsPage() {
     }
   };
 
-  useEffect(() => { fetchAudioFiles(); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    fetchAudioFiles();
+  }, []);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);

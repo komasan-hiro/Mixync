@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { Paper, Box, Typography, Button, Alert, List, ListItem, ListItemText, IconButton, Switch } from '@mui/material';
+import { Paper, Box, Typography, Button, Alert, List, ListItem, ListItemText, IconButton, Switch, Card, CardContent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import AlarmSettingModal from './AlarmSettingModal';
 
 // Helper function to get Authorization headers
@@ -121,51 +122,58 @@ function AlarmManager() {
             現在設定されているアラームはありません。
           </Typography>
         ) : (
-          <List sx={{ width: '100%', p: 0, mb: 2 }}>
-            {alarms.map((alarm, index) => (
-              <ListItem
-                disableGutters
+          <Box sx={{ width: '100%', mb: 2 }}>
+            {alarms.map((alarm) => (
+              <Card
                 key={alarm.id}
+                elevation={0}
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  borderBottom: index !== alarms.length - 1 ? '1px solid #f0f0f0' : 'none',
-                  pb: 2,
                   mb: 2,
-                  width: '100%'
+                  borderRadius: '20px',
+                  bgcolor: alarm.is_active ? '#f3f4f6' : '#fafafa',
+                  border: '1px solid',
+                  borderColor: alarm.is_active ? 'primary.light' : 'grey.200',
+                  position: 'relative',
+                  overflow: 'visible'
                 }}
               >
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                      {alarm.time}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDaysOfWeek(alarm.days_of_week)}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      {alarm.sound_file}
-                    </Typography>
+                <CardContent sx={{ pb: '16px !important' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box>
+                      <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: alarm.is_active ? 'text.primary' : 'text.disabled', lineHeight: 1 }}>
+                        {alarm.time}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1, color: alarm.is_active ? 'text.secondary' : 'text.disabled' }}>
+                        {formatDaysOfWeek(alarm.days_of_week)}
+                      </Typography>
+                    </Box>
+                    <Switch
+                      onChange={() => handleToggleAlarm(alarm)}
+                      checked={alarm.is_active === 1}
+                      color="primary"
+                    />
                   </Box>
-                  <Switch
-                    onChange={() => handleToggleAlarm(alarm)}
-                    checked={alarm.is_active === 1}
-                    color="primary"
-                  />
-                </Box>
 
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                  <IconButton size="small" onClick={() => handleOpenModal(alarm)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" color="error" onClick={() => handleDeleteAlarm(alarm.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </ListItem>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, borderTop: '1px solid rgba(0,0,0,0.05)', pt: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, opacity: alarm.is_active ? 1 : 0.6 }}>
+                      <MusicNoteIcon fontSize="small" color="action" />
+                      <Typography variant="caption" color="text.secondary">
+                        {alarm.sound_file}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <IconButton size="small" onClick={() => handleOpenModal(alarm)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteAlarm(alarm.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
             ))}
-          </List>
+          </Box>
         )}
 
         <Button

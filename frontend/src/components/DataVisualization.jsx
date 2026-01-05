@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Paper, Box, Typography, Select, MenuItem, FormControl, InputLabel,
     IconButton, ToggleButton, ToggleButtonGroup, Button,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    TextField
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -43,73 +44,38 @@ const getSunday = (d) => {
 };
 
 function DataVisualization() {
-    // EXPERIMENTAL DATA FLAG
-    const USE_DEMO_DATA = true;
+    // EXPERIMENTAL DATA FLAG - Default FALSE as per request
+    const USE_DEMO_DATA = false;
 
-    // Set initial date to Demo Data range if flag is on, otherwise today
-    const [currentDate, setCurrentDate] = useState(USE_DEMO_DATA ? new Date('2025-10-30') : new Date());
+    // Set initial date to Today
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Helper to calculate initial week range
+    const getInitialRange = (date) => {
+        const start = getSunday(date);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return { start, end };
+    };
+
+    const initialRange = getInitialRange(new Date());
+
+    const [startDate, setStartDate] = useState(initialRange.start.toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(initialRange.end.toISOString().split('T')[0]);
+
     const [events, setEvents] = useState([]);
     const [viewMode, setViewMode] = useState('slope'); // 'slope', 'mixing', 'comfort'
     const [displayFormat, setDisplayFormat] = useState('graph'); // 'graph' or 'table'
 
     useEffect(() => {
         if (USE_DEMO_DATA) {
-            // Hardcoded data from 10/30 to 11/4
             const demoEvents = [
-                {
-                    id: 1,
-                    alarm_time: '2025-10-30T07:00:00',
-                    mixing_pattern: 'C', // Shimmer Reverb
-                    awakening_hr_slope: 0.08720,
-                    awakening_hr_stddev: 9.75773,
-                    mood_rating: 5,
-                    comfort_score: 62.0
-                },
-                {
-                    id: 2,
-                    alarm_time: '2025-10-31T07:00:00',
-                    mixing_pattern: 'B', // PAN
-                    awakening_hr_slope: 0.06301,
-                    awakening_hr_stddev: 6.04014,
-                    mood_rating: 4,
-                    comfort_score: 67.4
-                },
-                {
-                    id: 3,
-                    alarm_time: '2025-11-01T07:00:00',
-                    mixing_pattern: 'A', // Tremolo
-                    awakening_hr_slope: 0.04382,
-                    awakening_hr_stddev: 3.26582,
-                    mood_rating: 3,
-                    comfort_score: 69.7
-                },
-                {
-                    id: 4,
-                    alarm_time: '2025-11-02T07:00:00',
-                    mixing_pattern: 'C', // Shimmer Reverb
-                    awakening_hr_slope: 0.09758,
-                    awakening_hr_stddev: 5.52011,
-                    mood_rating: 5,
-                    comfort_score: 70.0
-                },
-                {
-                    id: 5,
-                    alarm_time: '2025-11-03T07:00:00',
-                    mixing_pattern: 'A', // Tremolo
-                    awakening_hr_slope: 0.04686,
-                    awakening_hr_stddev: 3.56463,
-                    mood_rating: 3,
-                    comfort_score: 68.5
-                },
-                {
-                    id: 6,
-                    alarm_time: '2025-11-04T07:00:00',
-                    mixing_pattern: 'B', // PAN
-                    awakening_hr_slope: 0.16224,
-                    awakening_hr_stddev: 8.73651,
-                    mood_rating: 3,
-                    comfort_score: 36.2
-                }
+                { id: 1, alarm_time: '2025-10-30T07:00:00', mixing_pattern: 'C', awakening_hr_slope: 0.08720, awakening_hr_stddev: 9.75773, mood_rating: 5, comfort_score: 62.0 },
+                { id: 2, alarm_time: '2025-10-31T07:00:00', mixing_pattern: 'B', awakening_hr_slope: 0.06301, awakening_hr_stddev: 6.04014, mood_rating: 4, comfort_score: 67.4 },
+                { id: 3, alarm_time: '2025-11-01T07:00:00', mixing_pattern: 'A', awakening_hr_slope: 0.04382, awakening_hr_stddev: 3.26582, mood_rating: 3, comfort_score: 69.7 },
+                { id: 4, alarm_time: '2025-11-02T07:00:00', mixing_pattern: 'C', awakening_hr_slope: 0.09758, awakening_hr_stddev: 5.52011, mood_rating: 5, comfort_score: 70.0 },
+                { id: 5, alarm_time: '2025-11-03T07:00:00', mixing_pattern: 'A', awakening_hr_slope: 0.04686, awakening_hr_stddev: 3.56463, mood_rating: 3, comfort_score: 68.5 },
+                { id: 6, alarm_time: '2025-11-04T07:00:00', mixing_pattern: 'B', awakening_hr_slope: 0.16224, awakening_hr_stddev: 8.73651, mood_rating: 3, comfort_score: 36.2 }
             ];
             setEvents(demoEvents);
         } else {
@@ -133,6 +99,13 @@ function DataVisualization() {
         }
     };
 
+    // Update range when currentDate changes (via Week Buttons)
+    useEffect(() => {
+        const { start, end } = getInitialRange(currentDate);
+        setStartDate(start.toISOString().split('T')[0]);
+        setEndDate(end.toISOString().split('T')[0]);
+    }, [currentDate]);
+
     // --- Weekly Navigation Logic ---
     const changeWeek = (amount) => {
         const newDate = new Date(currentDate);
@@ -141,42 +114,41 @@ function DataVisualization() {
     };
 
     const goToToday = () => {
-        setCurrentDate(new Date());
+        const now = new Date();
+        setCurrentDate(now);
     };
 
-    const getWeekRange = () => {
-        const sunday = getSunday(currentDate);
-        const saturday = new Date(sunday);
-        saturday.setDate(sunday.getDate() + 6);
-        return { start: sunday, end: saturday };
+    // --- Filtering Logic ---
+    // If viewMode is 'mixing', use ALL events (filtered by having comfort score which is already done)
+    // Otherwise use Date Range
+    const filterEvents = () => {
+        if (viewMode === 'mixing') {
+            return events;
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+
+        return events.filter(e => {
+            const d = new Date(e.alarm_time);
+            return d >= start && d <= end;
+        });
     };
 
-    const { start, end } = getWeekRange();
-    const dateRangeString = `${start.toLocaleDateString()} ～ ${end.toLocaleDateString()}`;
-
-    // Filter events for current week
-    // Set end date to end of day for comparison
-    const endOfDay = new Date(end);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const weeklyEvents = events.filter(e => {
-        const d = new Date(e.alarm_time);
-        return d >= start && d <= endOfDay;
-    });
-
+    const filteredEvents = filterEvents();
     // Sort by date ascending
-    weeklyEvents.sort((a, b) => new Date(a.alarm_time) - new Date(b.alarm_time));
-
+    filteredEvents.sort((a, b) => new Date(a.alarm_time) - new Date(b.alarm_time));
 
     // --- Chart Data Preparation ---
 
     const slopeChartData = {
-        labels: weeklyEvents
+        labels: filteredEvents
             .filter(e => e.awakening_hr_slope !== null)
             .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })),
         datasets: [{
             label: '覚醒速度 (bpm/sec)',
-            data: weeklyEvents
+            data: filteredEvents
                 .filter(e => e.awakening_hr_slope !== null)
                 .map(e => parseFloat(e.awakening_hr_slope?.toFixed(3) || 0)),
             borderColor: '#29b6f6',
@@ -185,12 +157,9 @@ function DataVisualization() {
         }]
     };
 
-    // For mixing, we calculate stats based on validity within the week? 
-    // Usually "Mixing Comparison" might be better over all time, BUT user asked for "Weekly view like SleepChart".
-    // So we will show stats ONLY for this week.
-    // However, if count is low, it might be boring. But that's the request.
     const mixingStats = ['A', 'B', 'C', 'D', 'E'].map(mixing => {
-        const mixingEvents = weeklyEvents.filter(e => e.mixing_pattern === mixing && e.comfort_score !== null);
+        // For mixing, we use the filteredEvents, which are ALL events if viewMode is mixing
+        const mixingEvents = filteredEvents.filter(e => e.mixing_pattern === mixing && e.comfort_score !== null);
         const avgComfort = mixingEvents.length > 0
             ? mixingEvents.reduce((sum, e) => sum + e.comfort_score, 0) / mixingEvents.length
             : 0;
@@ -205,9 +174,6 @@ function DataVisualization() {
             count: mixingEvents.length
         };
     });
-    // Filter out 0 count unless demo data? 
-    // Actually, showing 0s is fine to indicate no data for that pattern this week.
-    // Let's filter out if ALL are zero? Or just keep A-E structure.
 
     const mixingChartData = {
         labels: mixingStats.map(m => m.mixing),
@@ -228,12 +194,12 @@ function DataVisualization() {
     };
 
     const comfortChartData = {
-        labels: weeklyEvents
+        labels: filteredEvents
             .filter(e => e.comfort_score !== null)
             .map(e => new Date(e.alarm_time).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })),
         datasets: [{
             label: '快適度スコア',
-            data: weeklyEvents
+            data: filteredEvents
                 .filter(e => e.comfort_score !== null)
                 .map(e => parseFloat(e.comfort_score?.toFixed(1) || 0)),
             borderColor: '#50e3c2',
@@ -276,12 +242,31 @@ function DataVisualization() {
         }
     };
 
+    // Calculate dynamic width for scrollable charts
+    // Base 600px, add 50px per data point over 10 points
+    const dataPointCount = filteredEvents.length;
+    const dynamicChartWidth = Math.max(100, Math.max(600, dataPointCount * 50));
+    const isScrollable = viewMode !== 'mixing'; // Mixing is fixed categories (5), usually doesn't need much scroll unless huge labels
+
     return (
         <Paper elevation={2} sx={{ width: '100%', p: 3, mt: 2 }}>
 
-            {/* Header: Title and Toggles */}
+            {/* Header: Toggles and View Mode */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-                <Typography variant="h6">データ可視化</Typography>
+
+                {/* View Mode Selector */}
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>表示モード</InputLabel>
+                    <Select
+                        value={viewMode}
+                        label="表示モード"
+                        onChange={(e) => setViewMode(e.target.value)}
+                    >
+                        <MenuItem value="slope">覚醒速度（Slope）</MenuItem>
+                        <MenuItem value="mixing">ミキシング比較</MenuItem>
+                        <MenuItem value="comfort">快適度推移</MenuItem>
+                    </Select>
+                </FormControl>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Button onClick={goToToday} size="small" variant="outlined" sx={{ minWidth: 'auto' }}>
@@ -305,44 +290,40 @@ function DataVisualization() {
                 </Box>
             </Box>
 
-            {/* Navigation: Prev/Next Week */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
-                <IconButton onClick={() => changeWeek(-1)} size="small">
-                    <ChevronLeftIcon />
-                </IconButton>
-                <Typography sx={{ mx: 2, fontWeight: 500 }}>
-                    {dateRangeString}
-                </Typography>
-                <IconButton onClick={() => changeWeek(1)} size="small">
-                    <ChevronRightIcon />
-                </IconButton>
-            </Box>
+            {/* Date Range Navigation (Hidden if Mixing Mode) */}
+            {viewMode !== 'mixing' && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                    <IconButton onClick={() => changeWeek(-1)} size="small">
+                        <ChevronLeftIcon />
+                    </IconButton>
 
-            {/* View Mode Selector (Only needed for Graph view primarily, but maybe filters table too?
-                User said "Table view" should show numerical data. 
-                Keep selector consistent for both? Or maybe table shows ALL columns?
-                Let's keep the selector active to filter what is emphasized, OR just show relevant columns in table.
-                Actually, mixing view requires different aggregation.
-                Let's keep the view selector at the top as before to control CONTEXT.
-            */}
-            <Box sx={{ mb: 3 }}>
-                <FormControl fullWidth size="small">
-                    <InputLabel>表示モード</InputLabel>
-                    <Select
-                        value={viewMode}
-                        label="表示モード"
-                        onChange={(e) => setViewMode(e.target.value)}
-                    >
-                        <MenuItem value="slope">覚醒速度（Slope）</MenuItem>
-                        <MenuItem value="mixing">ミキシング比較</MenuItem>
-                        <MenuItem value="comfort">快適度推移</MenuItem>
-                    </Select>
-                </FormControl>
-            </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TextField
+                            type="date"
+                            size="small"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            sx={{ width: 150 }}
+                        />
+                        <Typography>～</Typography>
+                        <TextField
+                            type="date"
+                            size="small"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            sx={{ width: 150 }}
+                        />
+                    </Box>
 
-            {weeklyEvents.length === 0 && mixingStats.every(m => m.count === 0) ? (
+                    <IconButton onClick={() => changeWeek(1)} size="small">
+                        <ChevronRightIcon />
+                    </IconButton>
+                </Box>
+            )}
+
+            {filteredEvents.length === 0 && (viewMode !== 'mixing' || mixingStats.every(m => m.count === 0)) ? (
                 <Typography color="text.secondary" align="center" sx={{ my: 4 }}>
-                    この週のデータはありません。
+                    データがありません。
                 </Typography>
             ) : (
                 <Box>
@@ -353,8 +334,10 @@ function DataVisualization() {
                                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
                                         低い値ほど穏やかな目覚めを示します
                                     </Typography>
-                                    <Box sx={{ height: 300 }}>
-                                        <Line data={slopeChartData} options={lineOptions} />
+                                    <Box sx={{ overflowX: 'auto', pb: 2 }}>
+                                        <Box sx={{ height: 300, minWidth: `${dynamicChartWidth}px` }}>
+                                            <Line data={slopeChartData} options={lineOptions} />
+                                        </Box>
                                     </Box>
                                 </Box>
                             )}
@@ -374,8 +357,10 @@ function DataVisualization() {
                             )}
                             {viewMode === 'comfort' && (
                                 <Box>
-                                    <Box sx={{ height: 300 }}>
-                                        <Line data={comfortChartData} options={lineOptions} />
+                                    <Box sx={{ overflowX: 'auto', pb: 2 }}>
+                                        <Box sx={{ height: 300, minWidth: `${dynamicChartWidth}px` }}>
+                                            <Line data={comfortChartData} options={lineOptions} />
+                                        </Box>
                                     </Box>
                                 </Box>
                             )}
@@ -424,7 +409,7 @@ function DataVisualization() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {weeklyEvents.map((row) => (
+                                        {filteredEvents.map((row) => (
                                             <TableRow key={row.id || row.alarm_time}>
                                                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
                                                     {new Date(row.alarm_time).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' })}
