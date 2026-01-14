@@ -40,13 +40,26 @@ wss.on('connection', function connection(ws) {
 // Alarm scheduler - checks every minute for alarms to ring
 setInterval(async () => {
   try {
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const currentDay = now.getDay();
+    // Force JST (UTC+9)
+    const nowUtc = new Date();
+    const jstOffset = 9 * 60; // +9 hours in minutes
+    const nowJst = new Date(nowUtc.getTime() + (jstOffset * 60 * 1000));
 
-    console.log(`[ALARM-SCHEDULER] Checking alarms at ${currentTime}, day ${currentDay}`);
+    // Adjust for local time difference if server is NOT in UTC (e.g. if node treats system time as local)
+    // A safer way for "Time string" is using Intl.DateTimeFormat
+    const formatter = new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const currentTime = formatter.format(new Date());
+    const currentDay = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })).getDay();
 
-    const stmt = db.prepare('SELECT * FROM alarms WHERE time = ? AND is_active = 1');
+    console.log(`[ALARM-SCHEDULER] Checking alarms at ${currentTime} (JST), day ${currentDay}`);
+
+    // Fix: Exclude deleted alarms
+    const stmt = db.prepare('SELECT * FROM alarms WHERE time = ? AND is_active = 1 AND (is_deleted IS NULL OR is_deleted = 0)');
     const alarms = stmt.all(currentTime);
 
     if (alarms && alarms.length > 0) {
@@ -118,6 +131,11 @@ setInterval(async () => {
                 console.log('[ALARM-SCHEDULER] Sent alarm to WebSocket client');
               }
             });
+
+            // Fix: Turn OFF the alarm after it rings (One-time use)
+            const turnOffStmt = db.prepare('UPDATE alarms SET is_active = 0 WHERE id = ?');
+            turnOffStmt.run(alarm.id);
+            console.log(`[ALARM-SCHEDULER] Auto-turned OFF alarm ${alarm.id}`);
 
           } catch (e) {
             console.error('[ALARM-SCHEDULER] Error processing alarm:', e.message);

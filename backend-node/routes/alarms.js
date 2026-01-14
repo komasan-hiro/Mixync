@@ -37,7 +37,8 @@ router.post('/', (req, res) => {
     console.log('[ALARM] Creating alarm:', { datetime, time, dayOfWeek, sound_file, mixing_pattern: pattern });
 
     const stmt = db.prepare('INSERT INTO alarms (user_id, time, days_of_week, sound_file, mixing_pattern, is_active, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 0)');
-    const info = stmt.run(userId, time, dayOfWeek, sound_file, pattern, is_active === undefined ? 1 : is_active);
+    // Default to 0 (OFF) if not provided. User must explicitly turn it on.
+    const info = stmt.run(userId, time, dayOfWeek, sound_file, pattern, is_active === undefined ? 0 : is_active);
 
     res.status(201).json({ message: 'Alarm created successfully.', alarmId: info.lastInsertRowid });
   } catch (error) {

@@ -23,12 +23,31 @@ async function fetchHeartRateDataRange(userId, startTime, endTime) {
         throw new Error('Fitbit not connected');
     }
 
-    // Format dates for Fitbit API
-    const dateStr = startTime.toISOString().split('T')[0];
-    const startTimeStr = startTime.toTimeString().slice(0, 8);
-    const endTimeStr = endTime.toTimeString().slice(0, 8);
+    // Force JST (UTC+9) for Fitbit API queries
+    // We need to format dates as YYYY-MM-DD and HH:MM:SS in JST
+    const formatJST = (date) => {
+        // Add 9 hours to UTC time
+        const jstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+        return {
+            dateStr: jstDate.toISOString().split('T')[0],
+            timeStr: jstDate.toISOString().split('T')[1].substring(0, 8)
+        };
+    };
 
-    console.log('[ALARM-PROCESS] Fetching HR data:', { dateStr, startTimeStr, endTimeStr });
+    const startJST = formatJST(startTime);
+    const endJST = formatJST(endTime);
+
+    // Use the date part from start time (assuming range doesn't cross midnight heavily implies same day for Fitbit API usually)
+    // Note: Fitbit API limit is 1 day. If range crosses midnight, this simple call might need split.
+    // However, usually sleeping is "one day" in logic or we query by range.
+    // The "date/yyyy-mm-dd/1d/1sec" endpoint uses the base date.
+
+    // For safety, let's use the date from the start time
+    const dateStr = startJST.dateStr;
+    const startTimeStr = startJST.timeStr;
+    const endTimeStr = endJST.timeStr;
+
+    console.log('[ALARM-PROCESS] Fetching HR data (JST):', { dateStr, startTimeStr, endTimeStr });
 
     try {
         const response = await axios.get(
