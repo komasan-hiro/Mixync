@@ -183,7 +183,14 @@ router.get('/sleep/week/:date', async (req, res) => {
   const { fitbit_user_id } = req.user;
 
   try {
-    const syncUrl = `https://api.fitbit.com/1.2/user/${fitbit_user_id}/sleep/list.json?sort=desc&offset=0&limit=50&beforeDate=${date}`;
+    // FIX: Calculate tomorrow (JST) to ensure "today's" data is included in "beforeDate"
+    // Assuming 'date' param is YYYY-MM-DD
+    const targetDate = new Date(date);
+    const tomorrow = new Date(targetDate);
+    tomorrow.setDate(targetDate.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const syncUrl = `https://api.fitbit.com/1.2/user/${fitbit_user_id}/sleep/list.json?sort=desc&offset=0&limit=50&beforeDate=${tomorrowStr}`;
     const fitbitResponse = await fitbitApiRequest(syncUrl, req.user);
     const newLogs = fitbitResponse.data.sleep;
 
@@ -195,7 +202,7 @@ router.get('/sleep/week/:date', async (req, res) => {
       console.log(`Synced ${newLogs.length} sleep logs.`);
     }
 
-    const targetDate = new Date(date);
+    // Recalculate Sunday based on the requested date
     const dayOfWeek = targetDate.getDay();
     const sunday = new Date(targetDate);
     sunday.setDate(targetDate.getDate() - dayOfWeek);
@@ -224,8 +231,18 @@ router.post('/sleep/sync', async (req, res) => {
   const { fitbit_user_id } = req.user;
 
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const syncUrl = `https://api.fitbit.com/1.2/user/${fitbit_user_id}/sleep/list.json?sort=desc&offset=0&limit=50&beforeDate=${today}`;
+    // FIX: Calculate "Tomorrow JST" to ensure today's data is fetched
+    const nowUtc = new Date();
+    const jstOffset = 9 * 60 * 60 * 1000;
+    const nowJst = new Date(nowUtc.getTime() + jstOffset);
+
+    // Add 1 day to be safely inclusive
+    nowJst.setDate(nowJst.getDate() + 1);
+    const tomorrowStr = nowJst.toISOString().split('T')[0];
+
+    console.log(`[SYNC] Fetching sleep logs before ${tomorrowStr} (JST+1)`);
+
+    const syncUrl = `https://api.fitbit.com/1.2/user/${fitbit_user_id}/sleep/list.json?sort=desc&offset=0&limit=50&beforeDate=${tomorrowStr}`;
     const fitbitResponse = await fitbitApiRequest(syncUrl, req.user);
     const newLogs = fitbitResponse.data.sleep;
 
