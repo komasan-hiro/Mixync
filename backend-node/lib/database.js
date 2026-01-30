@@ -4,6 +4,7 @@ const path = require('path');
 // Use a file-based database named biomixer.db
 const dbPath = path.join(__dirname, '..', 'biomixer.db');
 const db = new Database(dbPath);
+db.pragma('journal_mode = WAL');
 
 console.log('Connected to the SQLite database.');
 

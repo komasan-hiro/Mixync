@@ -99,7 +99,7 @@ function AlarmSettingModal({ isOpen, onClose, onSave, existingAlarm, audioFiles 
           <Typography variant="caption" display="block" sx={{ mt: 1 }}>
             ミキシングパターンは、利用日数に応じて自動的に切り替わります。
             <br />
-            (7日ごとに変更 → 35日後にAIモードへ移行)
+            (5日ごとに変更 → 25日後にAIモードへ移行)
           </Typography>
         </Paper>
 

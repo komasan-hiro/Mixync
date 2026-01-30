@@ -5,12 +5,12 @@ const path = require('path');
 const dbPath = path.join(__dirname, '..', 'biomixer.db');
 const db = new Database(dbPath);
 
-console.log('--- Generating Controlled Dummy Data (35 Days) ---');
+console.log('--- Generating Controlled Dummy Data (25 Days) ---');
 
 // 1. Clear existing data
 // 1. Clear existing data & Ensure Schema
 try {
-    console.log('Checking database schema...');
+    console.log('Checking database schema...'); // Keep existing logic...
     try {
         db.exec('ALTER TABLE alarm_events ADD COLUMN is_deleted INTEGER DEFAULT 0');
         console.log('Added missing column: is_deleted');
@@ -30,15 +30,15 @@ try {
 }
 
 // 2. Configuration
-// Date range: 2025/12/01 -> +34 days (total 35)
+// Date range: 2025/12/01 -> +24 days (total 25)
 const START_DATE = new Date('2025-12-01T07:00:00');
-const DAYS_COUNT = 35;
+const DAYS_COUNT = 25;
 
-// Exact counts for mixing patterns (7 each for A-E)
-// We will shuffle them to distribute over the 35 days
+// Exact counts for mixing patterns (5 each for A-E)
+// We will shuffle them to distribute over the 25 days
 const patterns = [];
 ['A', 'B', 'C', 'D', 'E'].forEach(p => {
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
         patterns.push(p);
     }
 });

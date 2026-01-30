@@ -8,6 +8,7 @@ const app = require('../app');
 const debug = require('debug')('backend-node:server');
 const http = require('http');
 const { initDb } = require('../lib/database');
+const { processPreAlarm } = require('../lib/alarm-logic');
 
 // Initialize the database
 initDb();
@@ -72,15 +73,18 @@ setInterval(async () => {
           console.log(`[ALARM-SCHEDULER] Triggering alarm for user ${alarm.user_id} at ${alarm.time}`);
 
           try {
-            const finalMixing = alarm.mixing_pattern || 'A';
-            console.log(`[ALARM-SCHEDULER] Using mixing pattern: ${finalMixing}`);
+            let finalMixing = alarm.mixing_pattern || 'A';
+            // If the alarm is set to AUTO but no event exists yet, we default to A for now
+            // But if an event is found, we use the event's mixing pattern
+
+            console.log(`[ALARM-SCHEDULER] Initial mixing pattern from alarm: ${finalMixing}`);
 
             const alarmTime = new Date().toISOString();
             let eventId;
 
             // Check if a pre-process event already exists (created within last 10 minutes)
             const existingEventStmt = db.prepare(`
-              SELECT id FROM alarm_events 
+              SELECT id, mixing_pattern FROM alarm_events 
               WHERE alarm_id = ? 
               AND created_at >= datetime('now', '-10 minutes')
               ORDER BY created_at DESC LIMIT 1
@@ -89,13 +93,23 @@ setInterval(async () => {
 
             if (existingEvent) {
               eventId = existingEvent.id;
-              console.log(`[ALARM-SCHEDULER] Found existing pre-process event ${eventId}`);
+              // Use the specific mixing pattern decided during pre-process
+              if (existingEvent.mixing_pattern) {
+                finalMixing = existingEvent.mixing_pattern;
+              }
+              console.log(`[ALARM-SCHEDULER] Found existing event ${eventId}, using pattern: ${finalMixing}`);
 
               // Update rang_at_jp
               const updateStmt = db.prepare("UPDATE alarm_events SET rang_at_jp = datetime('now', 'localtime') WHERE id = ?");
               updateStmt.run(eventId);
             } else {
               // Create new event if none exists
+              // If finalMixing is still AUTO here (because no event existed), resolve it to A
+              if (finalMixing === 'AUTO') {
+                finalMixing = 'A';
+                console.log('[ALARM-SCHEDULER] Resolving AUTO to A (fallback)');
+              }
+
               const eventStmt = db.prepare(`
                 INSERT INTO alarm_events (
                   user_id, alarm_id, alarm_time, mixing_pattern, rang_at_jp
@@ -171,145 +185,23 @@ setInterval(async () => {
           console.log(`[PRE-ALARM] Processing AUTO alarm for user ${alarm.user_id}`);
 
           try {
-            // 1. Create alarm event NOW (5 minutes before alarm rings)
-            const alarmTime = fiveMinutesLater;
-            const eventStmt = db.prepare(`
-              INSERT INTO alarm_events (
-                user_id, alarm_id, alarm_time, mixing_pattern, rang_at_jp
-              ) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))
-            `);
-            const eventInfo = eventStmt.run(alarm.user_id, alarm.id, alarmTime.toISOString(), 'AUTO');
-            const eventId = eventInfo.lastInsertRowid;
-
-            console.log(`[PRE-ALARM] Created event ${eventId} for alarm ${alarm.id}`);
-
-            // 2. Fetch HR data from Fitbit
-            // Calculate time range: 30 minutes before alarm to 15 minutes before alarm
-            const endTime = new Date(alarmTime.getTime() - 15 * 60 * 1000); // 15 min before alarm
-            const startTime = new Date(alarmTime.getTime() - 30 * 60 * 1000); // 30 min before alarm
-
-            console.log(`[PRE-ALARM] Fetching HR data from ${startTime.toISOString()} to ${endTime.toISOString()}`);
-
-            // Get Fitbit tokens
-            const userStmt = db.prepare('SELECT fitbit_access_token FROM users WHERE id = ?');
-            const user = userStmt.get(alarm.user_id);
-
-            let recommendedMixing = 'A';
-            let confidence = 0;
-            let hrValues = [];
-
-            if (user && user.fitbit_access_token) {
-              try {
-                // Format dates for Fitbit API
-                const dateStr = startTime.toISOString().split('T')[0];
-                const startTimeStr = startTime.toTimeString().slice(0, 8);
-                const endTimeStr = endTime.toTimeString().slice(0, 8);
-
-                // Fetch heart rate data from Fitbit
-                const hrResponse = await axios.get(
-                  `https://api.fitbit.com/1/user/-/activities/heart/date/${dateStr}/1d/1sec/time/${startTimeStr}/${endTimeStr}.json`,
-                  {
-                    headers: {
-                      'Authorization': `Bearer ${user.fitbit_access_token}`
-                    }
-                  }
-                );
-
-                const intradayData = hrResponse.data['activities-heart-intraday']?.dataset || [];
-
-                if (intradayData.length > 0) {
-                  console.log(`[PRE-ALARM] Received ${intradayData.length} HR data points`);
-
-                  // Interpolate to 5s intervals (simple version)
-                  // Note: Full interpolation logic is in alarm-process.js, here we use a simplified version
-                  // or we could import the helper if we moved it to a shared lib
-                  hrValues = intradayData.map(d => d.value); // Simplified for now
-
-                  // Calculate stats
-                  const sum = hrValues.reduce((a, b) => a + b, 0);
-                  const avg = sum / hrValues.length;
-                  const variance = hrValues.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / hrValues.length;
-                  const std = Math.sqrt(variance);
-
-                  // Store HR data in database
-                  const updateHrStmt = db.prepare(`
-                    UPDATE alarm_events 
-                    SET hr_pattern_before = ?, 
-                        hr_avg_before = ?, 
-                        hr_std_before = ?
-                    WHERE id = ?
-                  `);
-                  updateHrStmt.run(
-                    JSON.stringify(hrValues),
-                    avg,
-                    std,
-                    eventId
-                  );
-
-                  console.log(`[PRE-ALARM] Stored HR data in event ${eventId}`);
-
-                  // Get past events for DTW comparison
-                  const pastEventsStmt = db.prepare(`
-                    SELECT 
-                      id as event_id,
-                      hr_pattern_before,
-                      mixing_pattern,
-                      comfort_score
-                    FROM alarm_events
-                    WHERE user_id = ? 
-                      AND id != ?
-                      AND hr_pattern_before IS NOT NULL 
-                      AND comfort_score IS NOT NULL
-                    ORDER BY alarm_time DESC
-                  `);
-                  const pastEvents = pastEventsStmt.all(alarm.user_id, eventId);
-
-                  if (pastEvents.length >= 3) {
-                    console.log(`[PRE-ALARM] Found ${pastEvents.length} past events for DTW`);
-
-                    // Call Python backend for DTW recommendation
-                    const dtwResponse = await axios.post('http://localhost:8000/recommend-mixing', {
-                      current_pattern: hrValues,
-                      past_events: pastEvents.map(e => ({
-                        event_id: e.event_id,
-                        hr_pattern_before: JSON.parse(e.hr_pattern_before),
-                        mixing_pattern: e.mixing_pattern,
-                        comfort_score: e.comfort_score
-                      }))
-                    });
-
-                    recommendedMixing = dtwResponse.data.recommended_mixing;
-                    confidence = dtwResponse.data.confidence;
-
-                    console.log(`[PRE-ALARM] DTW recommended mixing: ${recommendedMixing} (confidence: ${confidence.toFixed(2)})`);
-                  } else {
-                    console.log(`[PRE-ALARM] Not enough past data (${pastEvents.length} events), using default`);
-                  }
-                } else {
-                  console.log('[PRE-ALARM] No HR data available, using default mixing A');
-                }
-              } catch (fitbitError) {
-                console.error('[PRE-ALARM] Fitbit/DTW error:', fitbitError.message);
-                console.log('[PRE-ALARM] Using default mixing A');
-              }
-            } else {
-              console.log('[PRE-ALARM] No Fitbit token, using default mixing A');
-            }
-
-            // Update alarm and event with recommended mixing
-            const updateAlarmStmt = db.prepare('UPDATE alarms SET mixing_pattern = ? WHERE id = ?');
-            updateAlarmStmt.run(recommendedMixing, alarm.id);
-
-            const updateEventStmt = db.prepare('UPDATE alarm_events SET mixing_pattern = ? WHERE id = ?');
-            updateEventStmt.run(recommendedMixing, eventId);
-
-            console.log(`[PRE-ALARM] Updated alarm ${alarm.id} and event ${eventId} to use mixing ${recommendedMixing}`);
+            // Use shared logic to process pre-alarm (create event, fetch HR, decide mixing)
+            const result = await processPreAlarm(alarm.user_id, alarm.id);
+            console.log(`[PRE-ALARM] Success: Event ${result.event_id}, Mixing ${result.recommended_mixing}`);
 
           } catch (e) {
-            console.error('[PRE-ALARM] Error:', e.message);
-            // Fallback
-            const updateStmt = db.prepare('UPDATE alarms SET mixing_pattern = ? WHERE id = ?');
-            updateStmt.run('A', alarm.id);
+            console.error('[PRE-ALARM] Error processing alarm:', e.message);
+            // Fallback to A is handled by processPreAlarm updates if DB allows, 
+            // but if processPreAlarm failed completely (e.g. DB error), we might need to manual fallback?
+            // processPreAlarm updates DB even on error (except catastrophic).
+            // But if it threw, maybe we should force A just in case.
+            try {
+              const updateStmt = db.prepare('UPDATE alarms SET mixing_pattern = ? WHERE id = ?');
+              updateStmt.run('A', alarm.id);
+              console.log(`[PRE-ALARM] Forced Fallback to Mixing A due to error.`);
+            } catch (fallbackErr) {
+              console.error('[PRE-ALARM] Fallback failed:', fallbackErr.message);
+            }
           }
         }
       }
