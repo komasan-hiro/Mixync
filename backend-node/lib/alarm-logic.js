@@ -112,8 +112,8 @@ async function processPreAlarm(userId, alarmId) {
                 const eventCount = countRes.count || 0;
                 console.log(`[ALARM-LOGIC] Completed events count: ${eventCount}`);
 
-                if (eventCount < 25) {
-                    const phaseIndex = Math.floor(eventCount / 5);
+                if (eventCount < 20) {
+                    const phaseIndex = Math.floor(eventCount / 4);
                     const patterns = ['A', 'B', 'C', 'D', 'E'];
                     recommendedMixing = patterns[phaseIndex] || 'A';
                     confidence = 1.0;

@@ -257,8 +257,8 @@ router.post('/recommend', async (req, res) => {
 
         console.log(`[RECOMMEND] Completed events count: ${eventCount}`);
 
-        if (eventCount < 25) {
-            const phaseIndex = Math.floor(eventCount / 5);
+        if (eventCount < 20) {
+            const phaseIndex = Math.floor(eventCount / 4);
             const patterns = ['A', 'B', 'C', 'D', 'E'];
             const fixedPattern = patterns[phaseIndex] || 'A';
 
